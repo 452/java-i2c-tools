@@ -39,3 +39,4 @@ i2cset -f -y 0 0x5f 0x0f 0xac
 
 ## Info
 https://wiki.st.com/stm32mpu/wiki/I2C_i2c-tools
+https://medium.com/@sharpcoder/reading-i2c-data-sheets-and-implementing-them-on-the-raspberry-pi-266a5b9ed6e9
