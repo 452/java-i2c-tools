@@ -15,7 +15,7 @@ public class I2C {
     private final int bus;
     private final int deviceAddress;
 
-    I2C(int bus, int deviceAddress) {
+    public I2C(int bus, int deviceAddress) {
         this.bus = bus;
         this.deviceAddress = deviceAddress;
     }
@@ -37,6 +37,11 @@ public class I2C {
 
     public String readByteAsHex(int memoryAddress) throws IOException {
         return Integer.toHexString(readByte(memoryAddress));
+    }
+
+    public void writeByte(int address, int command) throws IOException {
+        String cmd = "i2cset -f -y " + Integer.toString(bus) + " 0x" + Integer.toHexString(deviceAddress) + " 0x" + Integer.toHexString(address) + " 0x" + Integer.toHexString(command);
+        exec(cmd);
     }
 
     public String version() {
