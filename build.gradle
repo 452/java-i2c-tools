@@ -1,0 +1,109 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'com.jfrog.bintray' version '1.8.4'
+    id 'com.github.johnrengelman.shadow' version '5.1.0'
+}
+
+def globalName    = 'java-i2c-tools'
+def globalUrl     = 'https://github.com/452/java-i2c-tools'
+def globalVersion = '0.0.1'
+def globalDesc    = 'Java i2c-tools command-line wrapper, supports programmatic access to i2c bus'
+group = 'com.github.452'
+archivesBaseName = globalName
+version = globalVersion
+description = globalDesc
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile 'junit:junit:4.12'
+}
+
+def pomConfig = {
+
+    licenses {
+        license {
+            name 'Apache License, Version 2.0'
+            url  'http://www.apache.org/licenses/LICENSE-2.0'
+        }
+    }
+
+    developers {
+        developer {
+            name            'Ihor Lavryniuk'
+            email           'sp.titan@gmail.com'
+            organization    'Aleph'
+            organizationUrl 'https://github.com/452'
+        }
+    }
+
+    scm {
+        connection          'scm:git:git://github.com/452/java-i2c-tools.git'
+        developerConnection 'scm:git:ssh://github.com/452/java-i2c-tools.git'
+        url                 globalUrl
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+publishing {
+    publications { mavenJava( MavenPublication ) {
+            groupId    group
+            artifactId 'java-i2c-tools'
+            version    globalVersion
+
+            from components.java
+
+            artifact sourcesJar
+            artifact javadocJar
+            
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('name', globalName)
+                root.appendNode('description', globalDesc)              
+                root.appendNode('url', globalUrl)              
+                root.children().last() + pomConfig
+            }
+        }
+    }
+}
+
+bintray {
+    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
+    key  = project.hasProperty('bintrayKey') ? project.property('bintrayKey') : System.getenv('BINTRAY_KEY')
+
+    publications = [ 'mavenJava' ]
+
+    pkg {
+        repo                  = 'maven'
+        name                  = globalName
+        desc                  = globalDesc
+        licenses              = [ 'Apache-2.0' ]
+        websiteUrl            = globalUrl
+        vcsUrl                = 'https://github.com/452/java-i2c-tools.git'
+        labels                = [ 'java', 'i2c-tools', 'i2c' ]
+        publicDownloadNumbers = true
+        
+        version {
+            name   = globalVersion
+            vcsTag = globalVersion
+
+            gpg {
+                sign = true
+            }
+        }
+    }
+}
