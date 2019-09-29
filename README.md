@@ -23,6 +23,17 @@ sudo apt install i2c-tools
 sudo chown $USER:$USER /dev/i2c-9
 ```
 
+## Usage example
+[More examples](src/test/java/ua/kovel/java/i2c/tools/I2CTest.java)
+Java:
+```java
+import ua.kovel.java.i2c.tools.*;
+I2C i2c = new I2C("i2c-tiny-usb", 0x76); // if you have connected i2c adapter to your pc or laptop, this way provide more comfortable i2c bus number auto detection
+I2C i2c = new I2C(1, 0x76); // 1 bus number, 0x76 bme280 address
+Map<String, Adapter> adapters = I2C.availableAdapters();
+
+```
+
 ## i2c-tools basics commands example
 ```sh
 # all instantiated I2C adapters

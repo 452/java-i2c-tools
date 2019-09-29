@@ -37,7 +37,7 @@ public class I2CTest {
 
     @Test
     public void i2cAdaptersList() throws IOException {
-        Map<String, Bus> adapters = I2C.availableBusses();
+        Map<String, Adapter> adapters = I2C.availableAdapters();
         assertTrue(adapters.size() > 0);
     }
 }

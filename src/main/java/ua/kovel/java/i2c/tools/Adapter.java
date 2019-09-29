@@ -4,7 +4,7 @@ package ua.kovel.java.i2c.tools;
  *
  * @author ihor
  */
-public class Bus {
+public class Adapter {
 
     private int id;
     private String name;
@@ -45,7 +45,7 @@ public class Bus {
 
     @Override
     public String toString() {
-        return "Bus{" +
+        return "Adapter{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
