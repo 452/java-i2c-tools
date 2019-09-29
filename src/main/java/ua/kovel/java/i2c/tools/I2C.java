@@ -43,6 +43,19 @@ public class I2C {
         return result;
     }
 
+    public void readBytes(int memoryAddress, byte[] buffer, int length) throws Exception {
+        if (buffer == null) {
+            throw new Exception("Buffer not initialized");
+        }
+        if (buffer.length < length) {
+            throw new Exception("Buffer size cannot be smaller than length of requested data");
+        }
+        byte[] data = readBytes(memoryAddress, length);
+        for (int i = 0; i < length; i++) {
+            buffer[i] = data[i];
+        }
+    }
+
     public int readByte(int memoryAddress) throws IOException {
         String cmd = "i2cget -f -y " + Integer.toString(adapter) + " 0x" + Integer.toHexString(deviceAddress) + " 0x" + Integer.toHexString(memoryAddress);
         return Integer.parseInt(exec(cmd).findFirst().get().substring(2), 16);

@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
 
 /**
  *
- * @author ihor
+ * @author ihor.lavryniuk
  */
 public class I2CTest {
 

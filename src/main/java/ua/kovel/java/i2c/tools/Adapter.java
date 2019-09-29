@@ -2,7 +2,7 @@ package ua.kovel.java.i2c.tools;
 
 /**
  *
- * @author ihor
+ * @author ihor.lavryniuk
  */
 public class Adapter {
 
