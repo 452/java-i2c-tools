@@ -6,6 +6,9 @@
 package ua.kovel.java.i2c.tools;
 
 import java.io.IOException;
+import java.util.Map;
+
+import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -15,15 +18,26 @@ import static org.junit.Assert.*;
  */
 public class I2CTest {
 
+    private static I2C i2c = null;
+
+    @BeforeClass
+    public static void before() throws IOException {
+        i2c = new I2C("i2c-tiny-usb", 0x76);
+    }
+
     @Test
     public void version() {
-        I2C i2c = new I2C(9, 0x76);
         assertEquals("0.0.1", i2c.version());
     }
 
     @Test
     public void bme280() throws IOException {
-        I2C i2c = new I2C(9, 0x76);
         assertEquals(0x60, i2c.readByte(0xD0));
+    }
+
+    @Test
+    public void i2cAdaptersList() throws IOException {
+        Map<String, Bus> adapters = I2C.availableBusses();
+        assertTrue(adapters.size() > 0);
     }
 }
