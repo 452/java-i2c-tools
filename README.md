@@ -25,6 +25,17 @@ sudo chown $USER:$USER /dev/i2c-9
 
 ## Usage example
 [More examples](src/test/java/ua/kovel/java/i2c/tools/I2CTest.java)
+
+Groovy:
+```groovy
+@Grab(group='com.github.452', module='java-i2c-tools', version='0.0.1')
+import ua.kovel.java.i2c.tools.*;
+I2C i2c = new I2C("i2c-tiny-usb", 0x76);
+println "Response ${Integer.toHexString(i2c.readByte(0xD0))}"
+I2C.availableAdapters().each() { name, adapter ->
+	println "Name: $name id: $adapter.id"
+}
+```
 Java:
 ```java
 import ua.kovel.java.i2c.tools.*;
