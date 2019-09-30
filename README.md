@@ -32,8 +32,8 @@ Groovy:
 import ua.kovel.java.i2c.tools.*;
 I2C i2c = new I2C("i2c-tiny-usb", 0x76);
 println "Response ${Integer.toHexString(i2c.readByte(0xD0))}"
-I2C.availableAdapters().each() { name, adapter ->
-	println "Name: $name id: $adapter.id"
+I2C.availableAdapters().each() { adapter ->
+	println "Name: $adapter.name id: $adapter.id"
 }
 ```
 Java:
@@ -41,7 +41,7 @@ Java:
 import ua.kovel.java.i2c.tools.*;
 I2C i2c = new I2C("i2c-tiny-usb", 0x76); // if you have connected i2c adapter to your pc or laptop, this way provide more comfortable i2c bus number auto detection
 I2C i2c = new I2C(1, 0x76); // 1 bus number, 0x76 bme280 address
-Map<String, Adapter> adapters = I2C.availableAdapters();
+List<Adapter> adapters = I2C.availableAdapters();
 
 ```
 

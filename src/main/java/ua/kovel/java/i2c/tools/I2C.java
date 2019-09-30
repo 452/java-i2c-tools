@@ -1,12 +1,13 @@
 package ua.kovel.java.i2c.tools;
 
+import ua.kovel.java.i2c.tools.exceptions.I2CException;
+import ua.kovel.java.i2c.tools.exceptions.NoAdapterAvailableException;
+
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -28,12 +29,12 @@ public class I2C {
         this.deviceAddress = deviceAddress;
     }
 
-    public I2C(String i2cAdapterName, int deviceAddress) throws IOException {
-        this.adapter = availableAdapters().get(i2cAdapterName).getId();
+    public I2C(String i2cAdapterName, int deviceAddress) throws I2CException {
+        this.adapter = getAdapterByName(i2cAdapterName).getId();
         this.deviceAddress = deviceAddress;
     }
 
-    public byte[] readBytes(int memoryAddress, int length) throws IOException {
+    public byte[] readBytes(int memoryAddress, int length) throws I2CException {
         byte[] result = new byte[length];
         int position = 0;
         for (int i = memoryAddress; i < memoryAddress + length; i++) {
@@ -43,12 +44,12 @@ public class I2C {
         return result;
     }
 
-    public void readBytes(int memoryAddress, byte[] buffer, int length) throws Exception {
+    public void readBytes(int memoryAddress, byte[] buffer, int length) throws I2CException {
         if (buffer == null) {
-            throw new Exception("Buffer not initialized");
+            throw new I2CException("Buffer not initialized");
         }
         if (buffer.length < length) {
-            throw new Exception("Buffer size cannot be smaller than length of requested data");
+            throw new I2CException("Buffer size cannot be smaller than length of requested data");
         }
         byte[] data = readBytes(memoryAddress, length);
         for (int i = 0; i < length; i++) {
@@ -56,22 +57,34 @@ public class I2C {
         }
     }
 
-    public int readByte(int memoryAddress) throws IOException {
+    public int readByte(int memoryAddress) throws I2CException {
         String cmd = "i2cget -f -y " + Integer.toString(adapter) + " 0x" + Integer.toHexString(deviceAddress) + " 0x" + Integer.toHexString(memoryAddress);
         return Integer.parseInt(exec(cmd).findFirst().get().substring(2), 16);
     }
 
-    public String readByteAsHex(int memoryAddress) throws IOException {
+    public String readByteAsHex(int memoryAddress) throws I2CException {
         return Integer.toHexString(readByte(memoryAddress));
     }
 
-    public void writeByte(int address, int command) throws IOException {
+    public void writeByte(int address, int command) throws I2CException {
         String cmd = "i2cset -f -y " + Integer.toString(adapter) + " 0x" + Integer.toHexString(deviceAddress) + " 0x" + Integer.toHexString(address) + " 0x" + Integer.toHexString(command);
         exec(cmd);
     }
 
-    public static Map<String, Adapter> availableAdapters() throws IOException {
-        Map<String, Adapter> result = new HashMap();
+    private Adapter getAdapterByName(String name) throws I2CException {
+        Adapter adapter = availableAdapters().stream()
+                .filter(a -> {
+                    return name.equals(a.getName());
+                }).findAny()
+                .orElse(null);
+        if (adapter == null) {
+            throw new NoAdapterAvailableException(name);
+        }
+        return adapter;
+    }
+
+    public static List<Adapter> availableAdapters() throws I2CException {
+        List<Adapter> result = new LinkedList<>();
         String cmd = "i2cdetect -y -l";
         List<String> detectedAdapters = exec(cmd).collect(Collectors.toList());
         Pattern namePattern = Pattern.compile("(i2c-)(\\d)");
@@ -90,25 +103,33 @@ public class I2C {
             }
             if (desc.find()) {
                 String description = desc.group(0);
-                adapter.setName(description.substring(0, description.indexOf(" at ")));
+                try {
+                    adapter.setName(description.substring(0, description.indexOf(" at ")));
+                } catch (Exception e) {
+                    adapter.setName(description);
+                }
                 adapter.setDescription(description);
             }
-            result.put(adapter.getName(), adapter);
+            result.add(adapter);
         }
         return result;
     }
 
-    public String version() {
-        return "0.0.1";
+    public String version() throws I2CException {
+        return exec("i2cdetect -V").findFirst().get();
     }
 
-    private static Stream<String> exec(String command) throws IOException {
-        ProcessBuilder builder = new ProcessBuilder(command.split(" "));
-        builder.redirectErrorStream(true);
-        Process process = builder.start();
-        InputStream is = process.getInputStream();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        return reader.lines();
+    private static Stream<String> exec(String command) throws I2CException {
+        try {
+            ProcessBuilder builder = new ProcessBuilder(command.split(" "));
+            builder.redirectErrorStream(true);
+            Process process = builder.start();
+            InputStream is = process.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            return reader.lines();
+        } catch (Exception e) {
+            throw new I2CException(e);
+        }
     }
 
     private static String bytesToHex(byte[] bytes) {
