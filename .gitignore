@@ -27,3 +27,10 @@ bin
 hs_err_pid*
 /.gradle/
 /build/
+/target/
+.attach_*
+.checkstyle
+.classpath
+.project
+.settings
+.sts4-cache
