@@ -34,6 +34,12 @@ public class I2C {
         this.deviceAddress = deviceAddress;
     }
 
+    public void read(byte[] buffer, int length) throws I2CException {
+        for (int position = 0; position < length; position++) {
+            buffer[position] = (byte) readByte(position);
+        }
+    }
+
     public byte[] readBytes(int memoryAddress, int length) throws I2CException {
         byte[] result = new byte[length];
         int position = 0;
@@ -57,6 +63,11 @@ public class I2C {
         }
     }
 
+    public int read() throws I2CException {
+        String cmd = "i2cget -f -y " + Integer.toString(adapter) + " 0x" + Integer.toHexString(deviceAddress);
+        return Integer.parseInt(exec(cmd).findFirst().get().substring(2), 16);
+    }
+
     public int readByte(int memoryAddress) throws I2CException {
         String cmd = "i2cget -f -y " + Integer.toString(adapter) + " 0x" + Integer.toHexString(deviceAddress) + " 0x" + Integer.toHexString(memoryAddress);
         return Integer.parseInt(exec(cmd).findFirst().get().substring(2), 16);
@@ -64,6 +75,21 @@ public class I2C {
 
     public String readByteAsHex(int memoryAddress) throws I2CException {
         return Integer.toHexString(readByte(memoryAddress));
+    }
+
+    public void write(byte[] buffer, int length) throws I2CException {
+        for (int position = 0; position < length; position++) {
+            writeByte(position, buffer[position]);
+        }
+    }
+
+    public void write(int command) throws I2CException {
+        String cmd = "i2cset -f -y " + Integer.toString(adapter) + " 0x" + Integer.toHexString(deviceAddress) + " 0x" + Integer.toHexString(command);
+        exec(cmd);
+    }
+
+    public void write(int address, int command) throws I2CException {
+        writeByte(address, command);
     }
 
     public void writeByte(int address, int command) throws I2CException {
